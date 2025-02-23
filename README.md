@@ -1,5 +1,7 @@
 # Memos Widget for WordPress
 
+![Memos Widget Preview](Memos%20Widget.png)
+
 [English](#english) | [中文](#中文)
 
 ## English
