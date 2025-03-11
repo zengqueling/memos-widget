@@ -82,7 +82,7 @@ class Memos_Widget extends WP_Widget {
             <input class="widefat" id="<?php echo $this->get_field_id('api_url'); ?>"
                    name="<?php echo $this->get_field_name('api_url'); ?>" type="text"
                    value="<?php echo esc_attr($api_url); ?>">
-            <small>例如：https://your-memos-url</small>
+            <small>例如：https://your-memos-url （不带斜杠）</small>
         </p>
         <p>
             <label for="<?php echo $this->get_field_id('page_size'); ?>">显示条数：</label>
