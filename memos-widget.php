@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Memos Widget
- * Description: 在侧边栏显示Memos最新动态
- * Version: 1.3
+ * Description: 在侧边栏优雅显示Memos最新动态
+ * Version: 1.4
  * Author: 令爷
  * Author URI: https://www.zengqueling.com
  */
@@ -112,7 +112,7 @@ class Memos_Widget extends WP_Widget {
             'memos-widget-js',
             plugins_url('memos-widget.js', __FILE__),
             array(),
-            '1.3',
+            '1.4',
             true
         );
     }
@@ -207,10 +207,11 @@ class Memos_Widget extends WP_Widget {
         }
 
         if (empty($memos_list)) {
-            echo '<p>暂无动态</p>';
+            echo '<p class="memos-empty">暂无动态</p>';
             return;
         }
 
+        echo '<div class="memos-widget-wrapper">';
         echo '<ul class="memos-list">';
         foreach ($memos_list as $memo) {
             $content = isset($memo['content']) ? $memo['content'] : '';
@@ -229,6 +230,11 @@ class Memos_Widget extends WP_Widget {
                 }
             }
 
+            $tags = array();
+            if (isset($memo['tags']) && is_array($memo['tags'])) {
+                $tags = $memo['tags'];
+            }
+
             $memo_id = '';
             if (!empty($memo['uid'])) {
                 $memo_id = $memo['uid'];
@@ -243,13 +249,30 @@ class Memos_Widget extends WP_Widget {
 
             echo '<li class="memos-item">';
             echo '<div class="memos-content">' . esc_html($truncated) . '</div>';
-            if (!empty($time_str)) {
-                echo '<span class="memos-time">' . esc_html($time_str) . '</span>';
+
+            if (!empty($tags)) {
+                echo '<div class="memos-tags">';
+                foreach ($tags as $tag) {
+                    $tag_name = ltrim($tag, '#');
+                    echo '<span class="memos-tag">#' . esc_html($tag_name) . '</span>';
+                }
+                echo '</div>';
             }
-            echo '<a class="memos-more" href="' . esc_url($more_url) . '" target="_blank">[more]</a>';
+
+            echo '<div class="memos-footer">';
+            if (!empty($time_str)) {
+                echo '<span class="memos-time">';
+                echo '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
+                echo esc_html($time_str);
+                echo '</span>';
+            }
+            echo '<a class="memos-more" href="' . esc_url($more_url) . '" target="_blank">查看原文 ↗</a>';
+            echo '</div>'; // .memos-footer
+
             echo '</li>';
         }
         echo '</ul>';
+        echo '</div>'; // .memos-widget-wrapper
     }
 
     private function render_styles() {
@@ -260,57 +283,125 @@ class Memos_Widget extends WP_Widget {
         $style_rendered = true;
         ?>
         <style>
+            .memos-widget-wrapper {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            }
             .memos-list {
                 list-style: none;
                 padding: 0;
                 margin: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
             }
             .memos-item {
-                padding: 15px;
-                margin-bottom: 12px;
-                background-color: #f8f9fa;
-                border-radius: 8px;
-                transition: all 0.3s ease;
+                padding: 16px;
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
                 position: relative;
+                overflow: hidden;
+            }
+            .memos-item::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 3px;
+                height: 100%;
+                background: linear-gradient(180deg, #3b82f6 0%, #60a5fa 100%);
+                opacity: 0;
+                transition: opacity 0.25s ease;
             }
             .memos-item:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(59, 130, 246, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+                border-color: #cbd5e1;
+            }
+            .memos-item:hover::before {
+                opacity: 1;
             }
             .memos-content {
-                color: #2c3e50;
+                color: #1e293b;
                 font-size: 14px;
-                line-height: 1.6;
+                line-height: 1.65;
                 margin-bottom: 10px;
                 word-wrap: break-word;
                 white-space: pre-wrap;
             }
+            .memos-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+            .memos-tag {
+                font-size: 11px;
+                color: #3b82f6;
+                background: #eff6ff;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-weight: 500;
+            }
+            .memos-footer {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-top: 8px;
+                padding-top: 8px;
+                border-top: 1px dashed #f1f5f9;
+            }
             .memos-time {
                 color: #94a3b8;
                 font-size: 12px;
-                margin-right: 10px;
+                display: flex;
+                align-items: center;
             }
             .memos-more {
                 color: #3b82f6;
                 text-decoration: none;
                 font-size: 12px;
-                transition: color 0.2s ease;
+                font-weight: 500;
+                display: inline-flex;
+                align-items: center;
+                transition: all 0.2s ease;
             }
             .memos-more:hover {
-                color: #2563eb;
-                text-decoration: underline;
+                color: #1d4ed8;
+                transform: translateX(2px);
             }
             .memos-error {
                 color: #ef4444;
                 font-size: 13px;
+                padding: 10px;
+                background: #fef2f2;
+                border-radius: 8px;
+                border: 1px solid #fee2e2;
             }
-            @media (max-width: 768px) {
+            .memos-empty {
+                color: #94a3b8;
+                font-size: 13px;
+            }
+            @media (prefers-color-scheme: dark) {
                 .memos-item {
-                    padding: 12px;
-                    margin-bottom: 10px;
+                    background: #1e293b;
+                    border-color: #334155;
+                }
+                .memos-item:hover {
+                    border-color: #475569;
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
                 }
                 .memos-content {
-                    font-size: 13px;
+                    color: #f1f5f9;
+                }
+                .memos-footer {
+                    border-top-color: #334155;
+                }
+                .memos-tag {
+                    background: #1e3a8a;
+                    color: #93c5fd;
                 }
             }
         </style>
