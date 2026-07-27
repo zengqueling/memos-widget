@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Memos Widget
- * Description: 在侧边栏优雅显示Memos最新动态
- * Version: 1.4
+ * Description: 在侧边栏紧凑优雅地显示Memos最新动态
+ * Version: 1.5
  * Author: 令爷
  * Author URI: https://www.zengqueling.com
  */
@@ -112,7 +112,7 @@ class Memos_Widget extends WP_Widget {
             'memos-widget-js',
             plugins_url('memos-widget.js', __FILE__),
             array(),
-            '1.4',
+            '1.5',
             true
         );
     }
@@ -262,7 +262,7 @@ class Memos_Widget extends WP_Widget {
             echo '<div class="memos-footer">';
             if (!empty($time_str)) {
                 echo '<span class="memos-time">';
-                echo '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:3px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
+                echo '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
                 echo esc_html($time_str);
                 echo '</span>';
             }
@@ -292,15 +292,15 @@ class Memos_Widget extends WP_Widget {
                 margin: 0;
                 display: flex;
                 flex-direction: column;
-                gap: 12px;
+                gap: 8px;
             }
             .memos-item {
-                padding: 16px;
+                padding: 10px 12px;
                 background: #ffffff;
                 border: 1px solid #e2e8f0;
-                border-radius: 12px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                border-radius: 8px;
+                box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+                transition: all 0.2s ease;
                 position: relative;
                 overflow: hidden;
             }
@@ -313,11 +313,11 @@ class Memos_Widget extends WP_Widget {
                 height: 100%;
                 background: linear-gradient(180deg, #3b82f6 0%, #60a5fa 100%);
                 opacity: 0;
-                transition: opacity 0.25s ease;
+                transition: opacity 0.2s ease;
             }
             .memos-item:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 8px 20px rgba(59, 130, 246, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
                 border-color: #cbd5e1;
             }
             .memos-item:hover::before {
@@ -325,44 +325,44 @@ class Memos_Widget extends WP_Widget {
             }
             .memos-content {
                 color: #1e293b;
-                font-size: 14px;
-                line-height: 1.65;
-                margin-bottom: 10px;
+                font-size: 13px;
+                line-height: 1.5;
+                margin-bottom: 6px;
                 word-wrap: break-word;
                 white-space: pre-wrap;
             }
             .memos-tags {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 6px;
-                margin-bottom: 10px;
+                gap: 4px;
+                margin-bottom: 6px;
             }
             .memos-tag {
-                font-size: 11px;
+                font-size: 10px;
                 color: #3b82f6;
                 background: #eff6ff;
-                padding: 2px 8px;
-                border-radius: 12px;
+                padding: 1px 6px;
+                border-radius: 6px;
                 font-weight: 500;
             }
             .memos-footer {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                margin-top: 8px;
-                padding-top: 8px;
+                margin-top: 4px;
+                padding-top: 4px;
                 border-top: 1px dashed #f1f5f9;
             }
             .memos-time {
                 color: #94a3b8;
-                font-size: 12px;
+                font-size: 11px;
                 display: flex;
                 align-items: center;
             }
             .memos-more {
                 color: #3b82f6;
                 text-decoration: none;
-                font-size: 12px;
+                font-size: 11px;
                 font-weight: 500;
                 display: inline-flex;
                 align-items: center;
@@ -374,15 +374,15 @@ class Memos_Widget extends WP_Widget {
             }
             .memos-error {
                 color: #ef4444;
-                font-size: 13px;
-                padding: 10px;
+                font-size: 12px;
+                padding: 8px 10px;
                 background: #fef2f2;
-                border-radius: 8px;
+                border-radius: 6px;
                 border: 1px solid #fee2e2;
             }
             .memos-empty {
                 color: #94a3b8;
-                font-size: 13px;
+                font-size: 12px;
             }
             @media (prefers-color-scheme: dark) {
                 .memos-item {
@@ -391,7 +391,7 @@ class Memos_Widget extends WP_Widget {
                 }
                 .memos-item:hover {
                     border-color: #475569;
-                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                 }
                 .memos-content {
                     color: #f1f5f9;
