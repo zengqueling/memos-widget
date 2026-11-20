@@ -21,23 +21,54 @@ class MemosWidget {
     }
 
     async fetchMemos() {
-        const headers = {};
+        const headers = { 'Accept': 'application/json' };
         if (this.accessToken) {
             headers['Authorization'] = `Bearer ${this.accessToken}`;
         }
 
-        const response = await fetch(`${this.apiUrl}/api/v1/memos?pageSize=${this.pageSize}`, {
-            headers: headers
-        });
+        // 新版 Memos 只保留 /api/memos；/api/v1/* 已废弃（返回 410），仅作回退
+        const endpoints = [`${this.apiUrl}/api/memos`, `${this.apiUrl}/api/v1/memos`];
+        let lastStatus = 0;
 
-        if (!response.ok) {
+        for (const endpoint of endpoints) {
+            const response = await fetch(`${endpoint}?pageSize=${this.pageSize}`, {
+                headers: headers
+            });
+
+            if (response.ok) {
+                return await response.json();
+            }
+
+            lastStatus = response.status;
+
+            // 端点废弃或不存在 → 尝试下一个
+            if (response.status === 404 || response.status === 410 || response.status === 501) {
+                continue;
+            }
+
             let errorMsg = `HTTP error! status: ${response.status}`;
             if (response.status === 401) {
                 errorMsg = '401 Unauthorized';
             }
             throw new Error(errorMsg);
         }
-        return await response.json();
+
+        throw new Error(`HTTP error! status: ${lastStatus}`);
+    }
+
+    // 把 Markdown 正文压成适合侧边栏的纯文本摘要
+    makeExcerpt(raw) {
+        let text = String(raw || '');
+        text = text.replace(/!\[[^\]]*\]\([^)]*\)/g, '');
+        text = text.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
+        text = text.replace(/^\s{0,3}#{1,6}\s*/gm, '');
+        text = text.replace(/^\s{0,3}>\s?/gm, '');
+        text = text.replace(/\*\*|__|~~|`/g, '');
+        text = text.replace(/\s+/g, ' ').trim();
+        if (this.contentLength > 0 && text.length > this.contentLength) {
+            text = text.substring(0, this.contentLength) + '...';
+        }
+        return text;
     }
 
     renderMemos(memos) {
@@ -74,11 +105,7 @@ class MemosWidget {
             
             const content = document.createElement('div');
             content.className = 'memos-content';
-            const rawContent = memo.content || '';
-            const truncatedContent = rawContent.length > this.contentLength 
-                ? rawContent.substring(0, this.contentLength) + '...' 
-                : rawContent;
-            content.textContent = truncatedContent;
+            content.textContent = this.makeExcerpt(memo.content || '');
             li.appendChild(content);
 
             if (Array.isArray(memo.tags) && memo.tags.length > 0) {
@@ -116,11 +143,11 @@ class MemosWidget {
             if (memo.uid) {
                 memoId = memo.uid;
             } else if (memo.name && typeof memo.name === 'string' && memo.name.includes('/')) {
-                memoId = memo.name.split('/')[1];
+                memoId = memo.name.split('/').pop();
             } else if (memo.id) {
                 memoId = memo.id;
             }
-            more.href = memoId ? `${this.apiUrl}/m/${memoId}` : `${this.apiUrl}`;
+            more.href = memoId ? `${this.apiUrl}/memos/${memoId}` : `${this.apiUrl}`;
             more.textContent = '查看原文 ↗';
             more.target = '_blank';
 
